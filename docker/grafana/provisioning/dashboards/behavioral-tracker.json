@@ -1,0 +1,122 @@
+{
+  "title": "Behavioral Tracker — Async vs Sync",
+  "uid": "behavioral-tracker",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "refresh": "5s",
+  "time": { "from": "now-5m", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Request Rate — Async vs Sync (req/s)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "rate(events_async_total[30s])",
+          "legendFormat": "async /events/async"
+        },
+        {
+          "expr": "rate(events_sync_total[30s])",
+          "legendFormat": "sync /events/sync"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "reqps", "custom": { "lineWidth": 2 } }
+      }
+    },
+    {
+      "id": 2,
+      "title": "p95 Ingestion Latency — Async vs Sync",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(events_async_duration_seconds_bucket[30s])) by (le))",
+          "legendFormat": "async p95"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(events_sync_duration_seconds_bucket[30s])) by (le))",
+          "legendFormat": "sync p95"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "s", "custom": { "lineWidth": 2 } }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Batch Worker — Flush Rate (flushes/s)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "rate(batch_flush_total[30s])",
+          "legendFormat": "flushes/s"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ops", "custom": { "lineWidth": 2 } }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Batch Worker — Median Batch Size",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum(rate(batch_size_events_bucket[30s])) by (le))",
+          "legendFormat": "median events/flush"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(batch_size_events_bucket[30s])) by (le))",
+          "legendFormat": "p95 events/flush"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "short", "custom": { "lineWidth": 2 } }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Batch Flush Duration — p95",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(batch_flush_duration_seconds_bucket[30s])) by (le))",
+          "legendFormat": "flush p95"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "s", "custom": { "lineWidth": 2 } }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Total Events Stored",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "events_async_total",
+          "legendFormat": "async"
+        },
+        {
+          "expr": "events_sync_total",
+          "legendFormat": "sync"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "short" }
+      }
+    }
+  ]
+}
